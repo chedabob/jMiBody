@@ -26,6 +26,12 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
+
 
 import org.junit.Before;
 import org.junit.Test;
@@ -42,6 +48,7 @@ public class MiBodyTests {
 		URL url = getClass().getResource("/BODYDATA.txt");
 		File f = new File(url.getFile());
 		mRawBytes = toByteArray(f);
+		mFile = new MiBodyFile(mRawBytes);
 	}
 
 	@Test
@@ -51,7 +58,6 @@ public class MiBodyTests {
 
 	@Test
 	public void testInitialParse() {
-		mFile = new MiBodyFile(mRawBytes);
 		assertNotNull(mFile);
 	}
 
@@ -146,10 +152,22 @@ public class MiBodyTests {
 	public void testUserSlotSet () {
 		MiBodyUser user = mFile.getUsers()[0];
 		MiBodyReading reading = user.getReadings()[2];
+		
 		assertEquals(user.getUserSlot(),reading.getUser());
 	}
 	
-
+	@Test
+	public void testDateTimeCorrect () throws ParseException {
+		MiBodyUser user = mFile.getUsers()[0];
+		MiBodyReading reading = user.getReadings()[1];
+		
+		SimpleDateFormat format = new SimpleDateFormat("hh:mm:ss dd/MM/yyyy", Locale.ENGLISH);
+		format.setTimeZone(TimeZone.getTimeZone("UTC"));
+		Date expected = format.parse("20:09:47 11/05/2011");
+		Date actual = reading.getDateTime();
+		assertTrue(actual.equals(expected));
+	}
+	
 	private static byte[] toByteArray(File file) throws IOException {
 		int length = (int) file.length();
 		byte[] array = new byte[length];

@@ -22,40 +22,9 @@ package com.cbob.jmibody;
 import java.text.DecimalFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 
 public class MiBodyUtilities {
-	public static double ConvertCMToInches(double value) {
-		double cm = 0.393700787;
-		double total;
-		total = (value * cm); // Perform Calculation
-
-		return roundTo2dp(total);
-	}
-
-	public static double ConvertWeightKGToPounds(double value) {
-		return value * 2.2;
-	}
-
-	public static String ConvertWeightKGToStonePounds(double kgWeight) {
-		// http://help.wugnet.com/office/kg-stone-convertion-excel-ftopict1052299.html
-
-		// int stone = Convert.ToInt32(2.2 * kgWeight / 14);
-
-		double stone = kgWeight * 0.157473044418;
-
-		String stoneStr = Double.toString(stone);
-
-		int index = stoneStr.indexOf(".");
-
-		stoneStr = stoneStr.substring(0, index);
-		// int stone = Convert.ToInt32(kgWeight * 0.157473044418);
-
-		double pounds = (kgWeight * 0.157473044418 - (int) (kgWeight * 0.157473044418)) * 14;
-
-		pounds = roundTo2dp(pounds);
-
-		return String.format("{0} Stone {1} Pound(s)", stoneStr, pounds);
-	}
 
 	public static byte GetBitArrayValue(Boolean[] bArray) {
 		byte value = 0x00;
@@ -176,14 +145,16 @@ public class MiBodyUtilities {
 
         
         Calendar c = Calendar.getInstance();
+        c.setTimeZone(TimeZone.getTimeZone("UTC"));
         c.set(Calendar.YEAR, year);
-        c.set(Calendar.MONTH, month);
+        c.set(Calendar.MONTH, month - 1);
         c.set(Calendar.DAY_OF_MONTH, day);
-        c.set(Calendar.HOUR, hour);
+        c.set(Calendar.HOUR_OF_DAY, hour);
         c.set(Calendar.MINUTE, min);
         c.set(Calendar.SECOND, sec);
+        c.clear(Calendar.MILLISECOND);
 
-        return bodyReading.getDateTime();
+        return c.getTime();
     }
     
     public static Boolean IsRawReadingDataValid(int [] raw)
